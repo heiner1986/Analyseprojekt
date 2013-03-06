@@ -4,8 +4,8 @@ clc;
 
 %% read image
 % pic_org = imread('Knick-senkfuss_re.jpg');
-pic_org = imread('FootPower/10-270-L.jpg');
-
+% pic_org = imread('FootPower/10-270-L.jpg');
+pic_org = imread('FootPower/10-270-R.jpg');
 
 %% Parameter
 D_size = size(pic_org);
