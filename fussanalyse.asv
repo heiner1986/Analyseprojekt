@@ -652,3 +652,16 @@ plot([m_s_l m_s_r],[m_z_l m_z_r ],'-r');
 end
 
 end
+
+right_false = zeros(1:78,2)
+
+for iii = 1:78
+    if test(iii) == ndata(iii,1)
+        right(iii,1) = 1;
+    else
+        false(iii,2) = 1;
+    end
+end
+
+sum_right = sum(right);
+Ergebnis = (sum_right/78)*100
