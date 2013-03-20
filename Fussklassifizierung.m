@@ -1,41 +1,131 @@
-clear all;
-close all;
-clc;
+function varargout = Fussklassifizierung(varargin)
+% FUSSKLASSIFIZIERUNG MATLAB code for Fussklassifizierung.fig
+%      FUSSKLASSIFIZIERUNG, by itself, creates a new FUSSKLASSIFIZIERUNG or raises the existing
+%      singleton*.
+%
+%      H = FUSSKLASSIFIZIERUNG returns the handle to a new FUSSKLASSIFIZIERUNG or the handle to
+%      the existing singleton*.
+%
+%      FUSSKLASSIFIZIERUNG('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in FUSSKLASSIFIZIERUNG.M with the given input arguments.
+%
+%      FUSSKLASSIFIZIERUNG('Property','Value',...) creates a new FUSSKLASSIFIZIERUNG or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before Fussklassifizierung_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to Fussklassifizierung_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
 
-%% Daten Einlesen
-[ndata, text, alldata] = xlsread('list.xlsx');
+% Edit the above text to modify the response to help Fussklassifizierung
 
-%% Ordner f¸r Bilder erstellen
-mkdir('Bilder2')
+% Last Modified by GUIDE v2.5 19-Mar-2013 22:44:44
 
-%% Programm-/Plotauswahl
-% Programm
-hauptprogramm       = 0;
-test_schwellenwerte = 1;
-klassifizierung     = 1;
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @Fussklassifizierung_OpeningFcn, ...
+                   'gui_OutputFcn',  @Fussklassifizierung_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
 
-%% Auswahl Plot
-original                            = 0;
-rgb_einzeln                         = 0;
-histogramm_einzelfarben             = 0;
-pic_sw_und_smoothed                 = 0;
-histogramm_fuss                     = 0;
-subplot_roh_belastet_klassifiziert  = 1;
-
-start_pic   = 1;
-end_pic     = 78;
-%% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$Hauptprogramm
-if hauptprogramm == 1
-
-BEL_MITTELFUSS                  = zeros(78,1);
-BEL_VORFUSS                     = zeros(78,1);
-ZUORDUNG_FLAECHENVERHAELTNIS    = zeros(78,4);
-RECHTS_LINKS                    = zeros(78,1);
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
 
 
-for picture = start_pic:end_pic
-    
-        pic_org = imread(['FootPower/',text{picture,1}]);
+% --- Executes just before Fussklassifizierung is made visible.
+function Fussklassifizierung_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to Fussklassifizierung (see VARARGIN)
+
+% Choose default command line output for Fussklassifizierung
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes Fussklassifizierung wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = Fussklassifizierung_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in Dateiauswahl.
+function Dateiauswahl_Callback(hObject, eventdata, handles)
+% hObject    handle to Dateiauswahl (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+global filename;
+global pathname;
+
+[filename,pathname] = uigetfile({'*.jpg;*.tif;*.png;*.gif','All Image Files';...
+          '*.*','All Files' });
+set(handles.Dateiname,'string',filename);
+
+
+
+function Dateiname_Callback(hObject, eventdata, handles)
+% hObject    handle to Dateiname (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of Dateiname as text
+%        str2double(get(hObject,'String')) returns contents of Dateiname as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function Dateiname_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to Dateiname (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in start.
+function start_Callback(hObject, eventdata, handles)
+% hObject    handle to start (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+global filename;
+global pathname;
+
+format short
+
+%% Daten laden
+load ZUORDUNG_FLAECHENVERHAELTNIS.mat
+
+%% Bild einlesen
+pic_org = imread([pathname filename]);
 
 %% Parameter
 D_size = size(pic_org);
@@ -49,23 +139,6 @@ R(:,:,2:3) = zeros;
 G(:,:,1) = zeros;
 G(:,:,3) = zeros;
 B(:,:,1:2) = zeros;
-
-%% Histogramm der Einzelnen Farben
-% HIST_RGB = zeros(255,3);
-% 
-% for col = 1:D_size(2)
-%     for row = 1:D_size(1)
-%         for i = 1:254
-%             if pic_org(row,col,1) == i
-%             HIST_RGB(i+1,1) =   HIST_RGB(i+1,1)+1;
-%             elseif pic_org(row,col,2) == i
-%             HIST_RGB(i+1,2) =   HIST_RGB(i+1,2)+1;
-%             elseif pic_org(row,col,3) == i
-%             HIST_RGB(i+1,3) =   HIST_RGB(i+1,3)+1;
-%             end
-%         end
-%     end
-% end
 
 %% Fuﬂ in weiﬂ darstellen
 
@@ -133,28 +206,6 @@ for col = 1:D_size(2)
         end  
     end
 end
-            
-
-%% Median
-% median = 1;
-% summe =0;
-% while summe < (sum(HIST(:,2))/2)
-%     summe = summe+HIST(median,2);
-%     median = median+1;
-% end
-% 
-% % Maximas
-% max_first = max( HIST(1:median,2) );
-% [val_max_first idx_max_first] = find(HIST(:,2) == max_first);
-% 
-% max_second = max( HIST(median:end,2) );
-% [val_max_second idx_max_second] = find(HIST(:,2) == max_second);
-% 
-% % Minimum zwischen Maximas
-% minmin = min( HIST(val_max_first:val_max_second,2) );
-% [val_min_temp idx_min] = find(HIST(val_max_first:val_max_second,2) == minmin);
-% 
-% val_min = val_min_temp + val_max_first - 1;
 
 %% Median und Schwellen f¸r Belastete Flaeche
 
@@ -370,11 +421,12 @@ end
 [zeile_toe_temp spalte_toe ] = find( pic_finish( min(zeile_toe(:)) ,:,1)~= 0,1,'first');
 
 if spalte_toe >= (D_size(2)/2)
-    RECHTS_LINKS(picture) = 1;
+    RECHTS_LINKS = 1;
 else
-    RECHTS_LINKS(picture) = 2;
+    RECHTS_LINKS = 2;
 end
-    
+
+
 %% Pathologie
 
 %% Achse Vorfuﬂ
@@ -490,22 +542,6 @@ end
 
 end
 
-% % Unten rechts
-% hits_rechts_unten = zeros( D_size(1), 1);
-% hits_rechts_unten( 1:start_unten ) = 999;
-% 
-% for i = start_unten:D_size(1) 
-%     j = D_size(2);
-%     while  j > 1 && pic_finish(i,j,3) ~= 255
-%                    
-%            hits_rechts_unten(i) = hits_rechts_unten(i)+1;
-%            j = j-1;
-%      end
-% end
-% [spalte_rechts_unten_temp zeile_rechts_unten] = min(hits_rechts_unten);
-% 
-% spalte_rechts_unten = D_size(2) - spalte_rechts_unten_temp;
-
 %% Mittelachse
 m_z_l = round(mean((zeile_links_oben+zeile_links_unten)/2));
 m_s_l = round(mean((spalte_links_oben+spalte_links_unten)/2));
@@ -528,9 +564,9 @@ m_z = round( (m_z_l+m_z_r)/2);
 
 % Belastung Mittelfuﬂ
 if isempty(m1) && isempty(m2)
-BEL_MITTELFUSS(picture,1) = 0;
+BEL_MITTELFUSS = 0;
 else
-BEL_MITTELFUSS(picture,1) = (max(m2) - min(m2));
+BEL_MITTELFUSS = (max(m2) - min(m2));
 
 x1 = min(m2);
 [zeile_m1 none] = find(pic_finish(m_z,x1,3) == 255);
@@ -541,331 +577,183 @@ end
 
 % Belastung Vorfuﬂ
 if isempty(v1)
-BEL_VORFUSS(picture,1) = (max(v4) - min(v4)); 
+BEL_VORFUSS = (max(v4) - min(v4)); 
 elseif isempty(v3)
-BEL_VORFUSS(picture,1) = (max(v2) - min(v2));
+BEL_VORFUSS = (max(v2) - min(v2));
 elseif v1 == v3
-BEL_VORFUSS(picture,1) = (max(v4) - min(v4));    
+BEL_VORFUSS = (max(v4) - min(v4));    
 end
 
-% Belastung Vorfuﬂ
-if isempty(h1)
-BEL_RUECKFUSS(picture,1) = (max(h4) - min(h4)); 
-elseif isempty(h3)
-BEL_RUECKFUSS(picture,1) = (max(h2) - min(h2));
-elseif h1 == h3
-BEL_RUECKFUSS(picture,1) = (max(h4) - min(h4));    
-end
 
-ZUORDUNG_FLAECHENVERHAELTNIS(picture,2) = (BEL_MITTELFUSS(picture,1) / BEL_VORFUSS(picture,1))*100;
-ZUORDUNG_FLAECHENVERHAELTNIS(picture,3) = (BEL_MITTELFUSS(picture,1) / BEL_RUECKFUSS(picture,1))*100;
-ZUORDUNG_FLAECHENVERHAELTNIS(picture,4) = (BEL_RUECKFUSS(picture,1) / BEL_VORFUSS(picture,1))*100;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Plot
-if original == 1
-figure;
-image(pic_org)
-axis equal
-end
-
-if rgb_einzeln == 1
-figure;
-subplot(1,3,1)
-image(pic_org)
-hold on
-axis equal
-image(R)
-
-subplot(1,3,2)
-image(pic_org)
-hold on
-axis equal
-image(G)
-
-subplot(1,3,3)
-image(pic_org)
-hold on
-axis equal
-image(B)
-end
-
-if histogramm_einzelfarben == 1
-figure
-hold on
-plot(HIST_RGB(:,1),'r')
-plot(HIST_RGB(:,2),'g')
-plot(HIST_RGB(:,3),'b')
-end
-
-if pic_sw_und_smoothed == 1
-figure(1)
-subplot(1,2,1)
-image(pic_sw) 
-axis equal
-
-figure(1)
-subplot(1,2,2)
-image(pic_sw_smooth) 
-axis equal
-end
-
-if histogramm_fuss == 1
-figure
-hold on
-plot(HIST(:,1),'r')
-plot(HIST(:,2),'g')
-plot(HIST(:,3),'b')
-
-plot(median,HIST(median,2),'or')
-
-plot(val_max_first,HIST(val_max_first,2),'ob')
-plot(val_max_second,HIST(val_max_second,2),'ob')
-plot(val_min,HIST(val_min,2),'ok')
-end
-
-if subplot_roh_belastet_klassifiziert == 1
-
-
-% figure(ii)
-% subplot(1,4,2)
-% image(pic_org_bel) 
-% axis equal
-% 
-% figure(ii)
-% subplot(1,4,3)
-% image(pic_finish_temp)
-% axis equal
-
+ZUORDUNG_FLAECHENVERHAELTNIS(1,2) = (BEL_MITTELFUSS / BEL_VORFUSS)*100;
+%% plot
 % Fuss unbelastet
-close
-figure(picture)
-subplot(1,2,1)
+h = subplot(1,2,1);
+cla
 image(pic_org) 
 axis image
-% axis off
+axis off
+title('Original','FontSize',16)
 
 % Fuss belastet
-figure(picture)
-subplot(1,2,2)
+h = subplot(1,2,2);
+cla
 image(pic_finish)
 axis image
 hold on
-% axis off
+axis off
+title('Belastet','FontSize',16)
 
 arrow([spalte_links_oben zeile_links_oben],[spalte_rechts_oben zeile_rechts_oben],'Length',10,'Ends',[1 2])
-% arrow([spalte_links_unten zeile_links_unten],[spalte_rechts_unten zeile_rechts_unten],'Length',10,'Ends',[1 2])
 if isempty(m1) && isempty(m2)
 else
 arrow([x1 y],[x2 y],'Length',10,'Ends',[1 2])
 end
 
-% % Vorfussachse
-% plot(spalte_links_oben,zeile_links_oben,'og')
-% plot(spalte_rechts_oben,zeile_rechts_oben,'og')
-% plot([spalte_links_oben spalte_rechts_oben],[zeile_links_oben zeile_rechts_oben],'-r')
-% 
-% % Rueckfussachse
-% plot(spalte_links_unten,zeile_links_unten,'og')
-% plot(spalte_rechts_unten,zeile_rechts_unten,'og')
-% plot([spalte_links_unten spalte_rechts_unten],[zeile_links_unten zeile_rechts_unten],'-r')
-% 
-% % Verbindungslinien Vorfuss-Rueckfuss
-% plot([spalte_links_oben spalte_links_unten],[zeile_links_oben zeile_links_unten],'-r');
-% plot([spalte_rechts_oben spalte_rechts_unten],[zeile_rechts_oben zeile_rechts_unten],'-r');
-% 
-% % Mittelachse
-% plot(m_s_l,m_z_l,'og')
-% plot(m_s_r,m_z_r,'og')
-% plot([m_s_l m_s_r],[m_z_l m_z_r ],'-r');
-
-saveas(gcf,['Bilder2\',num2str(picture)])
-end
-
-end
-save('ZUORDUNG_FLAECHENVERHAELTNIS')
-end
-
-%% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$Auswertung
-%% Auswertung / Test Schwellwerte
-if test_schwellenwerte == 1
-load ZUORDUNG_FLAECHENVERHAELTNIS.mat
-% Ergebnismatrizen
-Ergebnis_gesamt = zeros(5000,3);
-Ergebnis_hohl   = zeros(5000,3);
-Ergebnis_senk   = zeros(5000,3);
-Ergebnis_andere = zeros(5000,3);
-
-% Z‰hler
-w = 1;
-nr = 2;
-% Schwellwerte Start-Stop
-Schwelle_Hohlfuss_end = 45;
-Schwelle_Senkfuss_start = 55;
-
-% Anzahl Fuesse und einzelne Fussarten
-n_ges = length(find(isnan(ndata(:,1)) == 0) );
-n_hohl = length(find(ndata(:,1) == 1) );
-n_senk = length(find(ndata(:,1) == 2) );
-n_andere = length(find(ndata(:,1) == 3) );
-
-Schwelle_Hohlfuss = 36;
-Schwelle_Senkfuss = 55;
-% for Schwelle_Hohlfuss = Schwelle_Hohlfuss_end:-1:5
-%     
-% for Schwelle_Senkfuss = Schwelle_Senkfuss_start:1:100
-
-%% Zuordnung Pathologie
-for picture = start_pic: end_pic
-
-if  (ZUORDUNG_FLAECHENVERHAELTNIS(picture,2) <= Schwelle_Hohlfuss)
-ZUORDUNG_FLAECHENVERHAELTNIS(picture,1) = 1;
-elseif  ZUORDUNG_FLAECHENVERHAELTNIS(picture,2) >= Schwelle_Senkfuss
-ZUORDUNG_FLAECHENVERHAELTNIS(picture,1) = 2;
-elseif ZUORDUNG_FLAECHENVERHAELTNIS(picture,2) > Schwelle_Hohlfuss && ZUORDUNG_FLAECHENVERHAELTNIS(picture,2) < Schwelle_Senkfuss
-ZUORDUNG_FLAECHENVERHAELTNIS(picture,1) = 3;
-end
-
-end
-
-
-%% Trefferquote
-% % Ergebnisse Schwelle Hohl
-% right_hohl = zeros(78,1);
-% for iii = start_pic: end_pic
-%     if ZUORDUNG_FLAECHENVERHAELTNIS(iii,1) == ndata(iii,nr) && ndata(iii,nr) == 1
-%         right_hohl(iii,1) = 1;
-%     else
-%         right_hohl(iii,1) = 0;
-%     end
-% end
-% 
-% sum_right_hohl = sum( right_hohl(:,1) );
-% Ergebnis_hohl(w,1)  =(sum_right_hohl/n_hohl)*100;
-% Ergebnis_hohl(w,2)  = Schwelle_Hohlfuss;
-% Ergebnis_hohl(w,3)  = Schwelle_Senkfuss;
-% 
-% % Ergebnisse Schwelle Senk
-% right_senk = zeros(78,1);
-% for iii = start_pic: end_pic
-%     if ZUORDUNG_FLAECHENVERHAELTNIS(iii,1) == ndata(iii,nr) && ndata(iii,nr) == 2
-%         right_senk(iii,1) = 1;
-%     else
-%         right_senk(iii,2) = 0;
-%     end
-% end
-% 
-% sum_right_senk = sum( right_senk(:,1) );
-% Ergebnis_senk(w,1)  =(sum_right_senk/n_senk)*100;
-% Ergebnis_senk(w,2)  = Schwelle_Hohlfuss;
-% Ergebnis_senk(w,3)  = Schwelle_Senkfuss;
-% 
-% % Ergebnisse Schwelle Andere
-% right_andere = zeros(78,1);
-% for iii = start_pic: end_pic
-%     if ZUORDUNG_FLAECHENVERHAELTNIS(iii,1) == ndata(iii,nr)  && ndata(iii,nr) == 3
-%         right_andere(iii,1) = 1;
-%     else
-%         right_andere(iii,2) = 0;
-%     end
-% end
-% 
-% sum_right_andere = sum( right_andere(:,1) );
-% Ergebnis_andere(w,1)  =(sum_right_andere/n_andere)*100;
-% Ergebnis_andere(w,2)  = Schwelle_Hohlfuss;
-% Ergebnis_andere(w,3)  = Schwelle_Senkfuss;
-
-% Ergebnisse Schwelle Gesamt
-
-right_ges = zeros(78,1);
-for iii = start_pic: end_pic
-    if ZUORDUNG_FLAECHENVERHAELTNIS(iii,1) == ndata(iii,nr)
-        right_ges(iii,1) = 1;
-    else
-        right_ges(iii,1) = 0;
-    end
-end
-
-sum_right_ges = sum( right_ges(:,1) );
-% Ergebnis_gesamt(w,1)  =(sum_right_ges/n_ges)*100
-Ergebnis_schwellen =(sum_right_ges/n_ges)*100
-Ergebnis_gesamt(w,2)  = Schwelle_Hohlfuss;
-Ergebnis_gesamt(w,3)  = Schwelle_Senkfuss;
-
-w = w+1;
-% end
-% end
-
-[val_ges idx_ges]       = max(Ergebnis_gesamt(:,1));
-[val_hohl idx_hohl]     = max(Ergebnis_hohl(:,1));
-[val_senk idx_senk]     = max(Ergebnis_senk(:,1));
-[val_andere idx_andere] = max(Ergebnis_andere(:,1));
-end
-
-%% Classify Pathologie
-
-if klassifizierung == 1
-load ZUORDUNG_FLAECHENVERHAELTNIS.mat
-nr = 2;
-n_ges = length(find(isnan(ndata(:,1)) == 0) );
-right_ges_classify = zeros(78,1);
-
-for picture = start_pic:end_pic
+%% classify
 
 ndata_new = ndata;
 ZUORDUNG_FLAECHENVERHAELTNIS_cut    = ZUORDUNG_FLAECHENVERHAELTNIS;
-% BEL_MITTELFUSS_cut                  = BEL_MITTELFUSS;
-% BEL_RUECKFUSS_cut                   = BEL_RUECKFUSS;
-% BEL_VORFUSS_cut                     = BEL_VORFUSS;
-% RECHTS_LINKS_cut                    = RECHTS_LINKS;
 
-xx(1,1) = ZUORDUNG_FLAECHENVERHAELTNIS(picture,2);
-% xx(1,2) = ZUORDUNG_FLAECHENVERHAELTNIS(picture,3);
-% xx(1,3) = ZUORDUNG_FLAECHENVERHAELTNIS(picture,4);
-% xx(1,4) = BEL_MITTELFUSS(picture);
-% xx(1,5) = BEL_RUECKFUSS(picture);
-% xx(1,6) = BEL_VORFUSS(picture);
-% xx(1,7) = RECHTS_LINKS(picture);
+xx(1,1) = ZUORDUNG_FLAECHENVERHAELTNIS(1,2);
 
-ndata_new(picture,:) = [];
+idx = find(ismember(text(:,1), filename)==1);
+ndata_new(idx,:) = [];
 
-ZUORDUNG_FLAECHENVERHAELTNIS_cut(picture,:) = [];
-% BEL_MITTELFUSS_cut(picture,:)               = [];
-% BEL_RUECKFUSS_cut(picture,:)                = [];
-% BEL_VORFUSS_cut(picture,:)                  = [];  
-% RECHTS_LINKS_cut(picture,:)                 = [];
+ZUORDUNG_FLAECHENVERHAELTNIS_cut(1,:) = [];
 
-xxgroup         = ndata_new(:,nr);
+xxgroup         = ndata_new(:,2);
 
 xxtraining(:,1) = ZUORDUNG_FLAECHENVERHAELTNIS_cut(:,2);
-% xxtraining(:,2) = ZUORDUNG_FLAECHENVERHAELTNIS_cut(:,3);
-% xxtraining(:,3) = ZUORDUNG_FLAECHENVERHAELTNIS_cut(:,4);
-% xxtraining(:,4) = BEL_MITTELFUSS_cut(:);
-% xxtraining(:,5) = BEL_RUECKFUSS_cut(:);
-% xxtraining(:,6) = BEL_VORFUSS_cut(:);
-% xxtraining(:,7) = RECHTS_LINKS_cut(:);
 
-[xxclass(picture),xxerr(picture),xxPosterior(picture,1:3),xxlogp,xxcoeff] = classify(xx,xxtraining,xxgroup);
+[xxclass,xxerr,xxPosterior(1,1:3),xxlogp,xxcoeff] = classify(xx,xxtraining,xxgroup);
 
-% for iii = start_pic: end_pic
-    if xxclass(picture) == ndata(picture,nr)
-        right_ges_classify(picture,1) = 1;
-    else
-        right_ges_classify(picture,1) = 0;
-    end
-% end
-
-
-
-end
-sum_right_ges_classify = sum( right_ges_classify(:,1) );
-Ergebnis_gesamt_classify  =(sum_right_ges_classify/n_ges)*100
-
-FINISH(:,1) = ndata(:,2);
-FINISH(:,2) = xxclass(:);
-FINISH(:,3) = right_ges_classify(:);
-FINISH(:,4) = xxerr(:);
-FINISH(:,5:7) = xxPosterior(:,1:3);
+if xxclass == 1
+   vorschlag = 'Hohlfusstyp';
+elseif xxclass == 2
+   vorschlag = 'Platt-/Senkfuss';
+elseif xxclass == 3
+   vorschlag = 'Normalfuss/Anderer Typ';
 end
 
+
+set(handles.verhaeltnis,'string',num2str(ZUORDUNG_FLAECHENVERHAELTNIS(1,2),'%.2f'))
+
+set(handles.phohl,  'string', num2str(xxPosterior(1,1)*100,'%.2f') )
+set(handles.pplatt, 'string', num2str(xxPosterior(1,2)*100,'%.2f') )
+set(handles.pnormal,'string', num2str(xxPosterior(1,3)*100,'%.2f') )
+
+set(handles.fusstyp,'string', vorschlag )
+
+function verhaeltnis_Callback(hObject, eventdata, handles)
+% hObject    handle to verhaeltnis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of verhaeltnis as text
+%        str2double(get(hObject,'String')) returns contents of verhaeltnis as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function verhaeltnis_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to verhaeltnis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function phohl_Callback(hObject, eventdata, handles)
+% hObject    handle to phohl (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of phohl as text
+%        str2double(get(hObject,'String')) returns contents of phohl as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function phohl_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to phohl (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function pplatt_Callback(hObject, eventdata, handles)
+% hObject    handle to pplatt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pplatt as text
+%        str2double(get(hObject,'String')) returns contents of pplatt as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function pplatt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pplatt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function pnormal_Callback(hObject, eventdata, handles)
+% hObject    handle to pnormal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pnormal as text
+%        str2double(get(hObject,'String')) returns contents of pnormal as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function pnormal_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pnormal (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function fusstyp_Callback(hObject, eventdata, handles)
+% hObject    handle to fusstyp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of fusstyp as text
+%        str2double(get(hObject,'String')) returns contents of fusstyp as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function fusstyp_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to fusstyp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

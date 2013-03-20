@@ -1,0 +1,98 @@
+%% read image
+%  pic_org = imread('FootPower/10-259-L.jpg'); 
+
+% Hohlfuss
+% pic_org = imread('FootPower/928-324-L.jpg');      %+
+% pic_org = imread('FootPower/928-324-R.jpg');      %+
+% 
+% pic_org = imread('FootPower/928-323-L.jpg');      %+
+% pic_org = imread('FootPower/928-323-R.jpg');      %+
+% 
+% pic_org = imread('FootPower/10-272-L.jpg');       %+
+% pic_org = imread('FootPower/10-272-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-270-L.jpg');       %+
+% pic_org = imread('FootPower/10-270-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-266-L.jpg');       %+ platt/senk statt hohl      
+% pic_org = imread('FootPower/10-266-R.jpg');       %+ platt/senk statt hohl 
+% 
+% pic_org = imread('FootPower/10-265-L.jpg');       %+ 
+% pic_org = imread('FootPower/10-265-R.jpg');       %+        
+% 
+% pic_org = imread('FootPower/10-263-L.jpg');       %-
+% pic_org = imread('FootPower/10-263-R.jpg');       %+-
+% 
+% pic_org = imread('FootPower/10-262-L.jpg');       %+
+% pic_org = imread('FootPower/10-262-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-261-L.jpg');       %+
+% pic_org = imread('FootPower/10-261-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-260-L.jpg');       %+
+% pic_org = imread('FootPower/10-260-R.jpg');       %+-
+% 
+% pic_org = imread('FootPower/928-321-L.jpg');      %-
+% pic_org = imread('FootPower/928-321-R.jpg');      %+-
+% 
+% pic_org = imread('FootPower/10-258-L.jpg');       %-
+% pic_org = imread('FootPower/10-258-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-257-L.jpg');       %+
+% pic_org = imread('FootPower/10-257-R.jpg');
+% 
+% pic_org = imread('FootPower/10-254-L.jpg');       %+
+% pic_org = imread('FootPower/10-254-R.jpg');       %+ platt/senk statt hohl    
+% 
+% pic_org = imread('FootPower/10-251-L.jpg');       %+-
+% pic_org = imread('FootPower/10-251-R.jpg');       %+-
+% 
+% pic_org = imread('FootPower/10-250-L.jpg');       %-
+% pic_org = imread('FootPower/10-250-R.jpg');       %-
+% 
+% pic_org = imread('FootPower/10-249-L.jpg');       %+
+% pic_org = imread('FootPower/10-249-R.jpg');       %+-
+% 
+% pic_org = imread('FootPower/10-248-L.jpg');       %+
+% pic_org = imread('FootPower/10-248-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-246-L.jpg');       %+
+% pic_org = imread('FootPower/10-246-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-244-L.jpg');       %+
+% pic_org = imread('FootPower/10-244-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/928-320-L.jpg');      %+
+% pic_org = imread('FootPower/928-320-R.jpg');      %+
+% 
+% pic_org = imread('FootPower/10-240-L.jpg');       %+
+% pic_org = imread('FootPower/10-240-R.jpg');       %+
+
+% Senkfuss
+% pic_org = imread('FootPower/10-268-L.jpg');       %+
+% pic_org = imread('FootPower/10-268-R.jpg');       %+-
+% 
+% pic_org = imread('FootPower/928-322-L.jpg');      %+
+% pic_org = imread('FootPower/928-322-R.jpg');      %+
+% 
+% pic_org = imread('FootPower/10-255-L.jpg');       %+
+% pic_org = imread('FootPower/10-255-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-253-L.jpg');       %+
+% pic_org = imread('FootPower/10-253-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-245-L.jpg');       %+
+% pic_org = imread('FootPower/10-245-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-242-L.jpg');       %-
+% pic_org = imread('FootPower/10-242-R.jpg');       %+-
+% 
+% pic_org = imread('FootPower/10-241-L.jpg');       %+
+% pic_org = imread('FootPower/10-241-R.jpg');       %+
+
+% Plattfuﬂ
+% pic_org = imread('FootPower/10-267-L.jpg');       %+
+% pic_org = imread('FootPower/10-267-R.jpg');       %+
+% 
+% pic_org = imread('FootPower/10-256-L.jpg');       %+
+% pic_org = imread('FootPower/10-256-R.jpg');       %+
