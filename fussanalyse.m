@@ -6,27 +6,29 @@ clc;
 [ndata, text, alldata] = xlsread('list.xlsx');
 
 %% Ordner für Bilder erstellen
-mkdir('Bilder2')
+% mkdir('Bilder2')
 
 %% Programm-/Plotauswahl
 % Programm
-hauptprogramm       = 0;
-test_schwellenwerte = 1;
-klassifizierung     = 1;
+hauptprogramm       = 1;
+test_schwellenwerte = 0;
+klassifizierung     = 0;
+darstellung         = 0;
 
 %% Auswahl Plot
-original                            = 0;
-rgb_einzeln                         = 0;
-histogramm_einzelfarben             = 0;
-pic_sw_und_smoothed                 = 0;
-histogramm_fuss                     = 0;
+original                            = 1;
+rgb_einzeln                         = 1;
+histogramm_einzelfarben             = 1;
+pic_sw_und_smoothed                 = 1;
+histogramm_fuss                     = 1;
 subplot_roh_belastet_klassifiziert  = 1;
+fussteilung                         = 1;
 
 start_pic   = 1;
 end_pic     = 78;
-%% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$Hauptprogramm
+%% $$$$$$$Hauptprogramm$$$$$$$
 if hauptprogramm == 1
-
+HIST_RGB                        = zeros(78,255,3);
 BEL_MITTELFUSS                  = zeros(78,1);
 BEL_VORFUSS                     = zeros(78,1);
 ZUORDUNG_FLAECHENVERHAELTNIS    = zeros(78,4);
@@ -50,26 +52,24 @@ G(:,:,1) = zeros;
 G(:,:,3) = zeros;
 B(:,:,1:2) = zeros;
 
-%% Histogramm der Einzelnen Farben
-% HIST_RGB = zeros(255,3);
-% 
-% for col = 1:D_size(2)
-%     for row = 1:D_size(1)
-%         for i = 1:254
-%             if pic_org(row,col,1) == i
-%             HIST_RGB(i+1,1) =   HIST_RGB(i+1,1)+1;
-%             elseif pic_org(row,col,2) == i
-%             HIST_RGB(i+1,2) =   HIST_RGB(i+1,2)+1;
-%             elseif pic_org(row,col,3) == i
-%             HIST_RGB(i+1,3) =   HIST_RGB(i+1,3)+1;
-%             end
-%         end
-%     end
-% end
+%% Histogramm der einzelnen Farben
+for col = 1:D_size(2) % Schleife für Pixelspalten
+    for row = 1:D_size(1) % Schleife für Pixelzeilen
+        for i = 1:254 % Schleife für Helligkeitswerte   
+            if pic_org(row,col,1) == i
+            HIST_RGB(picture,i+1,1) =   HIST_RGB(picture,i+1,1)+1;
+            elseif pic_org(row,col,2) == i
+            HIST_RGB(picture,i+1,2) =   HIST_RGB(picture,i+1,2)+1;
+            elseif pic_org(row,col,3) == i
+            HIST_RGB(picture,i+1,3) =   HIST_RGB(picture,i+1,3)+1;
+            end
+        end
+    end
+end
 
 %% Fuß in weiß darstellen
 
-schwelle = 15;
+schwelle = 20;
 pic_sw = pic_org;
 
 for i = 1:D_size(1)
@@ -116,8 +116,7 @@ for col = 2:( D_size(2)-1 )
 end
 
 %% Histogramm der Einzelnen Farben nur auf Fuß
-HIST= zeros(255,3);
-
+HIST = zeros(255,3);
 for col = 1:D_size(2)
     for row = 1:D_size(1)  
         for i = 1:254
@@ -561,13 +560,17 @@ ZUORDUNG_FLAECHENVERHAELTNIS(picture,2) = (BEL_MITTELFUSS(picture,1) / BEL_VORFU
 ZUORDUNG_FLAECHENVERHAELTNIS(picture,3) = (BEL_MITTELFUSS(picture,1) / BEL_RUECKFUSS(picture,1))*100;
 ZUORDUNG_FLAECHENVERHAELTNIS(picture,4) = (BEL_RUECKFUSS(picture,1) / BEL_VORFUSS(picture,1))*100;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Plot
+
+
+%% $$$$$$$Plot$$$$$$$ 
+if darstellung == 1
+
 if original == 1
 figure;
 image(pic_org)
-axis equal
+axis image
+axis off
+title('Originalbild','FontSize',16)
 end
 
 if rgb_einzeln == 1
@@ -575,20 +578,26 @@ figure;
 subplot(1,3,1)
 image(pic_org)
 hold on
-axis equal
+axis image
+axis off
 image(R)
+title('Rot','FontSize',16)
 
 subplot(1,3,2)
 image(pic_org)
 hold on
-axis equal
+axis image
+axis off
 image(G)
+title('Grün','FontSize',16)
 
 subplot(1,3,3)
 image(pic_org)
 hold on
-axis equal
+axis image
+axis off
 image(B)
+title('Blau','FontSize',16)
 end
 
 if histogramm_einzelfarben == 1
@@ -597,63 +606,75 @@ hold on
 plot(HIST_RGB(:,1),'r')
 plot(HIST_RGB(:,2),'g')
 plot(HIST_RGB(:,3),'b')
+
+title('Histogramm Einzelfarben','FontSize',16)
+xlabel('Farbwert','FontSize',12)
+ylabel('Häufigkeit','FontSize',12)
 end
 
 if pic_sw_und_smoothed == 1
-figure(1)
+figure
 subplot(1,2,1)
 image(pic_sw) 
-axis equal
+axis image
+axis off
+title('Abgrenzung Roh','FontSize',16)
 
-figure(1)
 subplot(1,2,2)
 image(pic_sw_smooth) 
-axis equal
+axis off
+axis image
+title('Abgrenzung Verbessert','FontSize',16)
+
 end
 
 if histogramm_fuss == 1
 figure
 hold on
-plot(HIST(:,1),'r')
+% plot(HIST(:,1),'r')
 plot(HIST(:,2),'g')
-plot(HIST(:,3),'b')
+% plot(HIST(:,3),'b')
 
 plot(median,HIST(median,2),'or')
 
 plot(val_max_first,HIST(val_max_first,2),'ob')
 plot(val_max_second,HIST(val_max_second,2),'ob')
 plot(val_min,HIST(val_min,2),'ok')
+
+title('Histogramm Grünwert','FontSize',16)
+xlabel('Farbwert','FontSize',12)
+ylabel('Häufigkeit','FontSize',12)
+legend('Verteilung Farbwert','Median','Erstes Maximum','Zweites Maximum','Minimum')
 end
 
 if subplot_roh_belastet_klassifiziert == 1
+figure
+subplot(1,2,1)
+image(pic_org_bel) 
+axis image
+axis off
+title('Unklassifiziert','FontSize',16)
 
-
-% figure(ii)
-% subplot(1,4,2)
-% image(pic_org_bel) 
-% axis equal
-% 
-% figure(ii)
-% subplot(1,4,3)
-% image(pic_finish_temp)
-% axis equal
-
+subplot(1,2,2)
+image(pic_finish_temp)
+axis image
+axis off
+title('Klassifiziert','FontSize',16)
 % Fuss unbelastet
-close
-figure(picture)
+figure(picture+10)
 subplot(1,2,1)
 image(pic_org) 
 axis image
-% axis off
-
+axis off
+title('Originalbild','FontSize',16)
 % Fuss belastet
-figure(picture)
+figure(picture+10)
 subplot(1,2,2)
 image(pic_finish)
 axis image
 hold on
-% axis off
-
+axis off
+title('Belastungsflächen','FontSize',16)
 arrow([spalte_links_oben zeile_links_oben],[spalte_rechts_oben zeile_rechts_oben],'Length',10,'Ends',[1 2])
 % arrow([spalte_links_unten zeile_links_unten],[spalte_rechts_unten zeile_rechts_unten],'Length',10,'Ends',[1 2])
 if isempty(m1) && isempty(m2)
@@ -661,34 +682,44 @@ else
 arrow([x1 y],[x2 y],'Length',10,'Ends',[1 2])
 end
 
-% % Vorfussachse
-% plot(spalte_links_oben,zeile_links_oben,'og')
-% plot(spalte_rechts_oben,zeile_rechts_oben,'og')
-% plot([spalte_links_oben spalte_rechts_oben],[zeile_links_oben zeile_rechts_oben],'-r')
-% 
-% % Rueckfussachse
-% plot(spalte_links_unten,zeile_links_unten,'og')
-% plot(spalte_rechts_unten,zeile_rechts_unten,'og')
-% plot([spalte_links_unten spalte_rechts_unten],[zeile_links_unten zeile_rechts_unten],'-r')
-% 
-% % Verbindungslinien Vorfuss-Rueckfuss
-% plot([spalte_links_oben spalte_links_unten],[zeile_links_oben zeile_links_unten],'-r');
-% plot([spalte_rechts_oben spalte_rechts_unten],[zeile_rechts_oben zeile_rechts_unten],'-r');
-% 
-% % Mittelachse
-% plot(m_s_l,m_z_l,'og')
-% plot(m_s_r,m_z_r,'og')
-% plot([m_s_l m_s_r],[m_z_l m_z_r ],'-r');
-
-saveas(gcf,['Bilder2\',num2str(picture)])
 end
 
+if fussteilung == 1
+% Fuss unbelastet
+figure
+image(pic_finish) 
+axis image
+axis off
+title('Einteilung Fußareale','FontSize',16)
+hold on
+% Vorfussachse
+plot(spalte_links_oben,zeile_links_oben,'og')
+plot(spalte_rechts_oben,zeile_rechts_oben,'og')
+plot([spalte_links_oben spalte_rechts_oben],[zeile_links_oben zeile_rechts_oben],'-r')
+
+% Rueckfussachse
+plot(spalte_links_unten,zeile_links_unten,'og')
+plot(spalte_rechts_unten,zeile_rechts_unten,'og')
+plot([spalte_links_unten spalte_rechts_unten],[zeile_links_unten zeile_rechts_unten],'-r')
+
+% Verbindungslinien Vorfuss-Rueckfuss
+plot([spalte_links_oben spalte_links_unten],[zeile_links_oben zeile_links_unten],'-r');
+plot([spalte_rechts_oben spalte_rechts_unten],[zeile_rechts_oben zeile_rechts_unten],'-r');
+
+% Mittelachse
+plot(m_s_l,m_z_l,'og')
+plot(m_s_r,m_z_r,'og')
+plot([m_s_l m_s_r],[m_z_l m_z_r ],'-r');
 end
-save('ZUORDUNG_FLAECHENVERHAELTNIS')
+% saveas(gcf,['Bilder2\',num2str(picture)])
+
+end
+end
+% save('ZUORDUNG_FLAECHENVERHAELTNIS')
 end
 
-%% $$$$$$$$$$$$$$$$$$$$$$$$$$$$$Auswertung
-%% Auswertung / Test Schwellwerte
+%% $$$$$$$Auswertung$$$$$$$
+%% Auswertung / Test Schwellwerte$$$$$$$
 if test_schwellenwerte == 1
 load ZUORDUNG_FLAECHENVERHAELTNIS.mat
 % Ergebnismatrizen
@@ -806,7 +837,7 @@ end
 %% Classify Pathologie
 
 if klassifizierung == 1
-load ZUORDUNG_FLAECHENVERHAELTNIS.mat
+load DATA.mat
 nr = 2;
 n_ges = length(find(isnan(ndata(:,1)) == 0) );
 right_ges_classify = zeros(78,1);

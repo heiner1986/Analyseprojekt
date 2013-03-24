@@ -22,7 +22,7 @@ function varargout = Fussklassifizierung(varargin)
 
 % Edit the above text to modify the response to help Fussklassifizierung
 
-% Last Modified by GUIDE v2.5 19-Mar-2013 22:44:44
+% Last Modified by GUIDE v2.5 20-Mar-2013 18:29:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -122,7 +122,7 @@ global pathname;
 format short
 
 %% Daten laden
-load ZUORDUNG_FLAECHENVERHAELTNIS.mat
+load DATA.mat
 
 %% Bild einlesen
 pic_org = imread([pathname filename]);
@@ -142,7 +142,7 @@ B(:,:,1:2) = zeros;
 
 %% Fuﬂ in weiﬂ darstellen
 
-schwelle = 15;
+schwelle = 20;
 pic_sw = pic_org;
 
 for i = 1:D_size(1)
@@ -588,6 +588,13 @@ end
 ZUORDUNG_FLAECHENVERHAELTNIS(1,2) = (BEL_MITTELFUSS / BEL_VORFUSS)*100;
 %% plot
 % Fuss unbelastet
+
+if RECHTS_LINKS == 2
+    side = 'Rechts';
+else
+    side = 'Links';
+end
+
 h = subplot(1,2,1);
 cla
 image(pic_org) 
@@ -636,6 +643,7 @@ elseif xxclass == 3
    vorschlag = 'Normalfuss/Anderer Typ';
 end
 
+set(handles.seite,'string', side)
 
 set(handles.verhaeltnis,'string',num2str(ZUORDUNG_FLAECHENVERHAELTNIS(1,2),'%.2f'))
 
@@ -749,6 +757,29 @@ function fusstyp_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function fusstyp_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to fusstyp (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function seite_Callback(hObject, eventdata, handles)
+% hObject    handle to seite (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of seite as text
+%        str2double(get(hObject,'String')) returns contents of seite as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function seite_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to seite (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
