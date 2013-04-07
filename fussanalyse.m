@@ -12,20 +12,20 @@ clc;
 % Programm
 hauptprogramm       = 1;
 test_schwellenwerte = 0;
-klassifizierung     = 1;
-darstellung         = 1;
+klassifizierung     = 0;
+darstellung         = 0;
 
 %% Auswahl Plot
-original                            = 0;
-rgb_einzeln                         = 0;
-histogramm_einzelfarben             = 0;
-pic_sw_und_smoothed                 = 0;
+original                            = 1;
+rgb_einzeln                         = 1;
+histogramm_einzelfarben             = 1;
+pic_sw_und_smoothed                 = 1;
 histogramm_fuss                     = 1;
-subplot_roh_belastet_klassifiziert  = 0;
-fussteilung                         = 0;
+subplot_roh_belastet_klassifiziert  = 1;
+fussteilung                         = 1;
 
-start_pic   = 23;
-end_pic     = 23;
+start_pic   = 1;
+end_pic     = 78;
 %% $$$$$$$Hauptprogramm$$$$$$$
 if hauptprogramm == 1
 HIST_RGB                        = zeros(78,255,3);
@@ -158,7 +158,7 @@ end
 %% Median und Schwellen für Belastete Flaeche
 
 HIST(:,2) = smooth(HIST(:,2),5);
-HIST(:,3) = smooth(HIST(:,3),5);
+
 median = 1;
 summe =0;
 while summe < (sum(HIST(:,2))/2)
@@ -175,7 +175,7 @@ max_second = findpeaks( HIST(median:end,2) );
 
 val_max_second = max(val_max_second_temp);
 
-% Bereich um Maximum Blau
+% Bereich um Masimum Blau
 max_blue = max( HIST(:,3) );
 [val_max_blue_temp idx_max_blue] = find(HIST(:,3) == max_blue);
 
@@ -195,25 +195,29 @@ schwelle_bel_hinten = val_max_second;
 pic_org_bel = pic_sw_smooth;
 
 fenster_um_min = 15;
-fenster_um_max = 10;
+fenster_um_max = 5;
 
 for i = 1:D_size(1)
     for j = 1:D_size(2)
         if pic_sw_smooth(i,j,1) == 255
-            if ( pic_org(i,j,2) > val_min + fenster_um_min )
+            
+            if ( pic_org(i,j,2) > val_min + fenster_um_min ) 
+                
                 pic_org_bel(i,j,1) = 0;
                 pic_org_bel(i,j,2) = 0;
-                pic_org_bel(i,j,3) = 255 ;            
+                pic_org_bel(i,j,3) = 255 ;
                 
-            elseif (pic_org(i,j,2) >= val_min - fenster_um_min && pic_org(i,j,2) <= val_min + fenster_um_min)
+            elseif (pic_org(i,j,2) >= val_min - fenster_um_min && pic_org(i,j,2) <= val_min + fenster_um_min) || ( pic_org(i,j,3) > val_max_blue )
+                
                 pic_org_bel(i,j,1) = 255;
                 pic_org_bel(i,j,2) = 0;
                 pic_org_bel(i,j,3) =0 ;
-                
+            
             else
                 pic_org_bel(i,j,1) = pic_org(i,j,1);
                 pic_org_bel(i,j,2) = pic_org(i,j,2);
                 pic_org_bel(i,j,3) = pic_org(i,j,3);     
+
             end
         end
     end
@@ -599,9 +603,9 @@ end
 if histogramm_einzelfarben == 1
 figure
 hold on
-plot(HIST_RGB(picture,:,1),'r')
-plot(HIST_RGB(picture,:,2),'g')
-plot(HIST_RGB(picture,:,3),'b')
+plot(HIST_RGB(:,1),'r')
+plot(HIST_RGB(:,2),'g')
+plot(HIST_RGB(:,3),'b')
 
 title('Histogramm Einzelfarben','FontSize',16)
 xlabel('Farbwert','FontSize',12)
@@ -622,92 +626,55 @@ axis off
 axis image
 title('Abgrenzung Verbessert','FontSize',16)
 
-figure
-subplot(1,2,1)
-image(pic_sw(1:200,1:end,1:3)) 
-axis image
-axis off
-title('Abgrenzung Roh','FontSize',14)
-
-subplot(1,2,2)
-image(pic_sw_smooth(1:200,1:end,1:3))
-axis image 
-axis off
-
-title('Abgrenzung Verbessert','FontSize',14)
-
-
 end
 
 if histogramm_fuss == 1
 figure
-% subplot(1,2,1)
-axis([50 255 0 2500])
 hold on
-tt1 = val_min - fenster_um_min;
-tt2 = val_min + fenster_um_min;
-fill([50 50 tt1 tt1],[0 2500 2500 0],'cyan','FaceColor',[0.4 0.4 0.2]); 
-fill([tt1 tt1 tt2 tt2],[0 2500 2500 0],'red','FaceColor',[1 0.6 0.6]); 
-fill([tt2 tt2 255 255],[0 2500 2500 0],'blue','FaceColor',[0.2 0.4 1]); 
+% plot(HIST(:,1),'r')
+plot(HIST(:,2),'g')
+% plot(HIST(:,3),'b')
 
-plot(HIST(:,2),'g','linewidth',1.5)
+plot(median,HIST(median,2),'or')
 
-plot(median,HIST(median,2),'or','MarkerFaceColor','r')
-
-plot(val_max_first,HIST(val_max_first,2),'ob','MarkerFaceColor','b')
-plot(val_max_second,HIST(val_max_second,2),'ob','MarkerFaceColor','b')
-plot(val_min,HIST(val_min,2),'ok','MarkerFaceColor','k')
+plot(val_max_first,HIST(val_max_first,2),'ob')
+plot(val_max_second,HIST(val_max_second,2),'ob')
+plot(val_min,HIST(val_min,2),'ok')
 
 title('Histogramm Grünwert','FontSize',16)
 xlabel('Farbwert','FontSize',12)
 ylabel('Häufigkeit','FontSize',12)
-legend('Unbelasteter Bereich','Unsicherer Bereich','Sicherer Bereich','Verteilung Farbwert','Median','Erstes Maximum','Zweites Maximum','Minimum','location','northwest')
-
-%%%%%%%
-
-% subplot(1,2,2)
-% axis([50 255 0 3500])
-% hold on
-% fill([val_max_blue val_max_blue 255 255],[0 3500 3500 0],'blue','FaceColor',[0.2 0.4 1]); 
-% plot(HIST(:,3),'b','linewidth',1.5)
-% plot(val_max_blue,HIST(val_max_blue,3),'or','MarkerFaceColor','r')
-% title('Histogramm Blauwert','FontSize',16)
-% xlabel('Farbwert','FontSize',12)
-% ylabel('Häufigkeit','FontSize',12)
-% legend('Sicherer Bereich','Verteilung Farbwert','Maximum','location','northwest')
-
-
-
+legend('Verteilung Farbwert','Median','Erstes Maximum','Zweites Maximum','Minimum')
 end
 
 if subplot_roh_belastet_klassifiziert == 1
 figure
-subplot(1,4,2)
+subplot(1,2,1)
 image(pic_org_bel) 
 axis image
 axis off
 title('Unklassifiziert','FontSize',16)
 
-subplot(1,4,3)
+subplot(1,2,2)
 image(pic_finish_temp)
 axis image
 axis off
 title('Klassifiziert','FontSize',16)
 % Fuss unbelastet
-% figure(picture+10)
-subplot(2,4,1)
+figure(picture+10)
+subplot(1,2,1)
 image(pic_org) 
 axis image
 axis off
 title('Originalbild','FontSize',16)
 % Fuss belastet
-figure
-% subplot(1,4,4)
+figure(picture+10)
+subplot(1,2,2)
 image(pic_finish)
 axis image
 hold on
 axis off
-title('Belastungsflächen mit Kennzeichnung der Parameter','FontSize',16)
+title('Belastungsflächen','FontSize',16)
 arrow([spalte_links_oben zeile_links_oben],[spalte_rechts_oben zeile_rechts_oben],'Length',10,'Ends',[1 2])
 % arrow([spalte_links_unten zeile_links_unten],[spalte_rechts_unten zeile_rechts_unten],'Length',10,'Ends',[1 2])
 if isempty(m1) && isempty(m2)
@@ -870,7 +837,7 @@ end
 %% Classify Pathologie
 
 if klassifizierung == 1
-% load DATA.mat
+load DATA.mat
 nr = 2;
 n_ges = length(find(isnan(ndata(:,1)) == 0) );
 right_ges_classify = zeros(78,1);
@@ -926,10 +893,10 @@ end
 sum_right_ges_classify = sum( right_ges_classify(:,1) );
 Ergebnis_gesamt_classify  =(sum_right_ges_classify/n_ges)*100
 
-% FINISH(:,1) = ndata(:,2);
-% FINISH(:,2) = xxclass(:);
-% FINISH(:,3) = right_ges_classify(:);
-% FINISH(:,4) = xxerr(:);
-% FINISH(:,5:7) = xxPosterior(:,1:3);
+FINISH(:,1) = ndata(:,2);
+FINISH(:,2) = xxclass(:);
+FINISH(:,3) = right_ges_classify(:);
+FINISH(:,4) = xxerr(:);
+FINISH(:,5:7) = xxPosterior(:,1:3);
 end
 

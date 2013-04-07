@@ -140,31 +140,35 @@ G(:,:,1) = zeros;
 G(:,:,3) = zeros;
 B(:,:,1:2) = zeros;
 
-%% Fuß in Weiß/ Hintergrund in Schwarz darstellen
-schwelle = 20;                          % Schwellenwert
-pic_sw = pic_org;                       % Schwarz-weiß Bild
+%% Fuß in weiß darstellen
 
-for i = 1:D_size(1)                     % Zeilen
-    for j = 1:D_size(2)                 % Spalten
+schwelle = 20;
+pic_sw = pic_org;
+
+for i = 1:D_size(1)
+    for j = 1:D_size(2)
      
-        if pic_sw(i,j,3) > schwelle;    % Fuß in Weiß
+        if pic_sw(i,j,3) > schwelle;
+
             pic_sw(i,j,1) = 255;
             pic_sw(i,j,2) = 255;
             pic_sw(i,j,3) = 255;  
-        else                            % Hintergrund in Schwarz
-            pic_sw(i,j,1) = 0; 
+
+        else
+            pic_sw(i,j,1) = 0;
             pic_sw(i,j,2) = 0;
             pic_sw(i,j,3) = 0;
         end
     end
 end
 
-%% Bild glaetten
-pic_sw_smooth = pic_sw; % geglaettetes schwar-weiss Bild
-for col = 2:( D_size(2)-1 )             % Zeilen
-    for row = 2: ( D_size(1)-1 )        % Spalten
+%% Ränder glätten
+pic_sw_smooth = pic_sw;
+
+for col = 2:( D_size(2)-1 )
+    for row = 2: ( D_size(1)-1 )
         summe = 0;
-        idx       = zeros(1,8);         % Definition der Pixelumgebung
+        idx       = zeros(1,8);
         idx(1)    = pic_sw_smooth( ( row-1),(col-1),1 );
         idx(2)    = pic_sw_smooth( ( row  ),(col-1),1 );
         idx(3)    = pic_sw_smooth( ( row+1),(col-1),1 );
@@ -174,9 +178,9 @@ for col = 2:( D_size(2)-1 )             % Zeilen
         idx(7)    = pic_sw_smooth( ( row  ),(col+1),1 );
         idx(8)    = pic_sw_smooth( ( row+1),(col+1),1 );
         
-        summe = sum(idx);   % Summation der Farbwerte der einzelnen den
-                            % betrachteten Pixel umgebenen Pixel
-        if summe < 1020     % Zuordnung Hintergrund / Fuß
+        summe = sum(idx);
+        
+        if summe < 1020
             pic_sw_smooth(row,col,1) = 0;
             pic_sw_smooth(row,col,2) = 0;
             pic_sw_smooth(row,col,3) = 0;
@@ -204,15 +208,16 @@ for col = 1:D_size(2)
 end
 
 %% Median und Schwellen für Belastete Flaeche
-%Glätten des Histogramms
+
 HIST(:,2) = smooth(HIST(:,2),5);
-%Median der Helligkeitsverteilung bilden
+
 median = 1;
 summe =0;
 while summe < (sum(HIST(:,2))/2)
     summe = summe+HIST(median,2);
     median = median+1;
 end
+
 % Maximas Gruen
 max_first = max( HIST(1:median,2) );
 [val_max_first idx_max_first] = find(HIST(:,2) == max_first);
@@ -221,31 +226,50 @@ max_second = findpeaks( HIST(median:end,2) );
 [val_max_second_temp idx_max_second] = find(HIST(:,2) == max_second(1));
 
 val_max_second = max(val_max_second_temp);
+
+% Bereich um Masimum Blau
+max_blue = max( HIST(:,3) );
+[val_max_blue_temp idx_max_blue] = find(HIST(:,3) == max_blue);
+
+val_max_blue=max(val_max_blue_temp);
+
 % Minimum zwischen Maximas Gruen
 minmin = min( HIST(val_max_first:val_max_second,2) );
 [val_min_temp idx_min] = find(HIST(val_max_first:val_max_second,2) == minmin);
 
 val_min = max(val_min_temp) + val_max_first - 1;
+
+
 %% Fuß Original und Belastungsflächen Blau darstellen
 schwelle_bel_vorne = val_max_first ;
 schwelle_bel_hinten = val_max_second;
+
 pic_org_bel = pic_sw_smooth;
+
 fenster_um_min = 15;
+fenster_um_max = 5;
+
 for i = 1:D_size(1)
     for j = 1:D_size(2)
         if pic_sw_smooth(i,j,1) == 255
+            
             if ( pic_org(i,j,2) > val_min + fenster_um_min ) 
+                
                 pic_org_bel(i,j,1) = 0;
                 pic_org_bel(i,j,2) = 0;
                 pic_org_bel(i,j,3) = 255 ;
-            elseif (pic_org(i,j,2) >= val_min - fenster_um_min && pic_org(i,j,2) <= val_min + fenster_um_min)
+                
+            elseif (pic_org(i,j,2) >= val_min - fenster_um_min && pic_org(i,j,2) <= val_min + fenster_um_min) || ( pic_org(i,j,3) > val_max_blue )
+                
                 pic_org_bel(i,j,1) = 255;
                 pic_org_bel(i,j,2) = 0;
                 pic_org_bel(i,j,3) =0 ;
+            
             else
                 pic_org_bel(i,j,1) = pic_org(i,j,1);
                 pic_org_bel(i,j,2) = pic_org(i,j,2);
                 pic_org_bel(i,j,3) = pic_org(i,j,3);     
+
             end
         end
     end
@@ -402,11 +426,6 @@ else
     RECHTS_LINKS = 2;
 end
 
-if RECHTS_LINKS == 2
-    side = 'Rechts';
-else
-    side = 'Links';
-end
 
 %% Pathologie
 
@@ -541,6 +560,7 @@ m_z = round( (m_z_l+m_z_r)/2);
 
 [h1 h2] = find(pic_finish(zeile_links_unten:zeile_rechts_unten,:,3) == 255);       
 [h3 h4] = find(pic_finish(zeile_rechts_unten:zeile_links_unten,:,3) == 255);
+% [m3 m4] = find(pic_finish(m_z_r:m_z_l,:,3) == 255);
 
 % Belastung Mittelfuß
 if isempty(m1) && isempty(m2)
@@ -566,9 +586,15 @@ end
 
 
 ZUORDUNG_FLAECHENVERHAELTNIS(1,2) = (BEL_MITTELFUSS / BEL_VORFUSS)*100;
-
 %% plot
-% Original
+% Fuss unbelastet
+
+if RECHTS_LINKS == 2
+    side = 'Rechts';
+else
+    side = 'Links';
+end
+
 h = subplot(1,2,1);
 cla
 image(pic_org) 
@@ -576,7 +602,7 @@ axis image
 axis off
 title('Original','FontSize',16)
 
-% Belastet
+% Fuss belastet
 h = subplot(1,2,2);
 cla
 image(pic_finish)
@@ -591,26 +617,24 @@ else
 arrow([x1 y],[x2 y],'Length',10,'Ends',[1 2])
 end
 
-%% Klassifizierung der Fusstypen
+%% classify
+
 ndata_new = ndata;
-ZUORDUNG_FLAECHENVERHAELTNIS_cut    = ZUORDUNG_FLAECHENVERHAELTNIS;...
+ZUORDUNG_FLAECHENVERHAELTNIS_cut    = ZUORDUNG_FLAECHENVERHAELTNIS;
 
+xx(1,1) = ZUORDUNG_FLAECHENVERHAELTNIS(1,2);
 
-xx(1,1) = ZUORDUNG_FLAECHENVERHAELTNIS(1,2); % Zuordnen des zu klassifizierenden Fusses
+idx = find(ismember(text(:,1), filename)==1);
+ndata_new(idx,:) = [];
 
-idx = find(ismember(text(:,1), filename)==1); %Index der Zeile des gewaehlten Fusses
-ndata_new(idx,:) = []; % Loeschen der Zeile des gewaehlten Fusses aus der Klassifikationsliste
+ZUORDUNG_FLAECHENVERHAELTNIS_cut(1,:) = [];
 
-ZUORDUNG_FLAECHENVERHAELTNIS_cut(idx,:) = [];  % Loeschen der Zeile des gewaehlten Fusses aus dem Vektor mit den Parametern für jeden Fuss
+xxgroup         = ndata_new(:,2);
 
-xxgroup         = ndata_new(:,2); % Erstellung des Gruppenvektors
+xxtraining(:,1) = ZUORDUNG_FLAECHENVERHAELTNIS_cut(:,2);
 
-xxtraining(:,1) = ZUORDUNG_FLAECHENVERHAELTNIS_cut(:,2); % Erstellen des Trainingsvektors
+[xxclass,xxerr,xxPosterior(1,1:3),xxlogp,xxcoeff] = classify(xx,xxtraining,xxgroup);
 
-[xxclass,xxerr,xxPosterior(1,1:3),xxlogp,xxcoeff] =... % Klassifizieren
-    classify(xx,xxtraining,xxgroup);
-
-%% Vorschlag zur Klassifizierung
 if xxclass == 1
    vorschlag = 'Hohlfusstyp';
 elseif xxclass == 2
@@ -619,7 +643,6 @@ elseif xxclass == 3
    vorschlag = 'Normalfuss/Anderer Typ';
 end
 
-%% Handles
 set(handles.seite,'string', side)
 
 set(handles.verhaeltnis,'string',num2str(ZUORDUNG_FLAECHENVERHAELTNIS(1,2),'%.2f'))
